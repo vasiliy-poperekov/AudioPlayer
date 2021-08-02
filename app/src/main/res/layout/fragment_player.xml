@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_violet">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/bv_to_back"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@drawable/ic_baseline_keyboard_arrow_left_24"
+        android:backgroundTint="@color/blue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_player_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Now Playing"
+        android:textColor="@color/white"
+        android:textSize="36sp"
+        app:layout_constraintEnd_toStartOf="@id/bv_songs_list"
+        app:layout_constraintStart_toEndOf="@id/bv_to_back"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/bv_songs_list"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/ic_baseline_format_list_bulleted_24"
+        android:backgroundTint="@color/blue"
+        app:layout_constraintBottom_toBottomOf="@id/bv_to_back"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/bv_to_back" />
+
+    <ImageView
+        android:id="@+id/song_picture"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="80dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_player_title" />
+
+    <LinearLayout
+        android:id="@+id/ll_song_title_and_subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="@id/song_picture"
+        app:layout_constraintStart_toStartOf="@id/song_picture"
+        app:layout_constraintTop_toBottomOf="@id/song_picture">
+
+        <TextView
+            android:id="@+id/tv_song_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            tools:text="Some Song Title" />
+
+        <TextView
+            android:id="@+id/tv_song_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textAlignment="center"
+            android:textColor="@color/blue"
+            android:textSize="22sp"
+            tools:text="Some Song Subtitle" />
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_with_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ll_song_title_and_subtitle"
+        app:layout_constraintBottom_toTopOf="@id/cl_playing_manager">
+
+        <TextView
+            android:id="@+id/tv_wasted_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="1:11" />
+
+        <TextView
+            android:id="@+id/tv_remaining_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="-1:11" />
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/sb_music_changes"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:progressBackgroundTint="@color/white"
+            android:thumbTint="@color/white"
+            app:layout_constraintBottom_toBottomOf="@id/tv_wasted_time"
+            app:layout_constraintEnd_toStartOf="@id/tv_remaining_time"
+            app:layout_constraintStart_toEndOf="@id/tv_wasted_time"
+            app:layout_constraintTop_toTopOf="@id/tv_wasted_time" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_playing_manager"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cl_with_time"
+        app:layout_constraintBottom_toTopOf="@id/cl_add_or_delete">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/bv_repeating_songs"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/ic_baseline_repeat_24"
+            android:backgroundTint="@color/white"
+            app:layout_constraintEnd_toStartOf="@id/bv_play_last_track"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/bv_play_last_track"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/ic_baseline_fast_rewind_24"
+            android:backgroundTint="@color/white"
+            app:layout_constraintEnd_toStartOf="@id/bv_play"
+            app:layout_constraintStart_toEndOf="@id/bv_repeating_songs"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/bv_play"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/ic_baseline_play_arrow_24"
+            android:backgroundTint="@color/white"
+            app:layout_constraintEnd_toStartOf="@id/bv_play_next_track"
+            app:layout_constraintStart_toEndOf="@id/bv_play_last_track"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/bv_play_next_track"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/ic_baseline_fast_forward_24"
+            android:backgroundTint="@color/white"
+            app:layout_constraintEnd_toStartOf="@id/bv_info_about_track"
+            app:layout_constraintStart_toEndOf="@id/bv_play"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/bv_info_about_track"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/ic_baseline_more_horiz_24"
+            android:backgroundTint="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/bv_play_next_track"
+            app:layout_constraintTop_toTopOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_add_or_delete"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cl_playing_manager"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/bv_favourite_song"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/ic_baseline_favorite_border_24"
+            android:backgroundTint="@color/blue"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/bv_delete_song"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/bv_delete_song"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/ic_baseline_delete_24"
+            android:backgroundTint="@color/blue"
+            app:layout_constraintStart_toEndOf="@id/bv_favourite_song"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
