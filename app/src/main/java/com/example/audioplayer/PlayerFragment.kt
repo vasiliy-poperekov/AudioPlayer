@@ -1,28 +1,27 @@
 package com.example.audioplayer
 
-import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Intent
-import android.graphics.drawable.Drawable
-import android.media.MediaPlayer
+import android.content.*
+import android.os.Build
 import android.os.Bundle
-import android.os.Handler
+import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RemoteViews
 import android.widget.SeekBar
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
 import com.example.audioplayer.databinding.FragmentPlayerBinding
-import kotlinx.coroutines.*
-import java.lang.Exception
-import kotlin.coroutines.coroutineContext
-import kotlin.system.measureTimeMillis
 
 class PlayerFragment : Fragment() {
 
     private var binding: FragmentPlayerBinding? = null
-    val playerService = PlayerService()
+    var managerIntent = Intent()
+    var duration: Int? = 0
+    var usedService = PlayerService()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,46 +34,78 @@ class PlayerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val pendingIntent = activity?.createPendingResult(PEND_REC_CODE, Intent(), 0)
-        val intent = Intent(view.context, PlayerService::class.java).putExtra(PEND_KEY, pendingIntent)
-        activity?.startService(intent)
-//        var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-//            if (it.resultCode == Activity.RESULT_OK){
-//                val data = it.data
-//                binding!!.tvSongTitle.text = data?.getStringExtra(RESULT)
-//            }
-//        }
-//
-//        resultLauncher.launch()
-        //activity?.startService(Intent(view.context, playerService::class.java))
-       //binding!!.sbMusicChanges.max = playerService.mediaPlayer.duration
-        //playerService.playOrStopMusic()
-        //seekBarAction()
+        managerIntent = Intent(view.context, PlayerService::class.java)
+        activity?.startService(managerIntent)
+        playOrStopMusic()
 
-//        CoroutineScope(Dispatchers.Main).launch {
-//            while (playerService.mediaPlayer!=null){
-//                updateSeekBar()
-//                delay(1000)
-//            }
-//        }
-    }
+        val serviceConnection = object : ServiceConnection{
+            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                usedService = (service as PlayerService.MyBinder).getService()
+                updatePlayButton()
+                duration = usedService.mediaPlayer.duration
+                binding!!.sbMusicChanges.max = duration!!
+            }
+            override fun onServiceDisconnected(name: ComponentName?) {}
+        }
+        activity?.bindService(managerIntent, serviceConnection, 0)
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+        val brForSeekBar = object : BroadcastReceiver(){
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val currentTime = intent?.getIntExtra(RECEIVED_TIME, 0)
+                updateSeekBar(currentTime!!)
+                updatePlayButton()
+            }
+        }
+        activity?.registerReceiver(brForSeekBar, IntentFilter(BROADCAST_ACTION_FOR_SB))
 
-        if (resultCode == PEND_REC_CODE){
-            binding!!.tvSongTitle.text = "Some message"
+        seekBarAction()
+
+        val notifyManager = activity?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
+            if (notifyManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID)==null){
+                val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIF_CHAR_SEQUENCE, NotificationManager.IMPORTANCE_DEFAULT)
+                notifyManager.createNotificationChannel(channel)
+            }
         }
 
-//        binding!!.tvSongTitle.text = data?.getStringExtra(RESULT)
+//        val remoteViews = RemoteViews(activity?.packageName, R.layout.notification_player)
+//        remoteViews.setTextViewText(R.id.tv_notify_song_title, "Song Title From Fragment")
+//        remoteViews.setTextViewText(R.id.tv_notify_song_subtitle, "Song Subtitle From Fragment")
+//        remoteViews.setOnClickPendingIntent(R.id.bv_notify_play_or_stop_track,
+//            PendingIntent.getService(activity?.applicationContext,
+//                0,
+//                Intent(activity?.applicationContext, PlayerService::class.java),
+//                0))
+
+        val playIntent = Intent(view.context, PlayerService::class.java)
+        playIntent.action = PLAY_OR_STOP_ACTION_FROM_NOTIFY
+        val playPendInt = PendingIntent.getService(view.context, 0, playIntent, 0)
+
+        val notifBuilder = NotificationCompat.Builder(activity?.applicationContext!!, NOTIFICATION_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_baseline_music_note_24)
+            .setContentTitle("Song Title")
+            .setContentText("Song Subtitle")
+            .addAction(R.drawable.ic_baseline_play_arrow_24, "Play", playPendInt)
+            .build()
+        notifyManager.notify(NOTIFICATION_ID, notifBuilder)
     }
 
-    fun updateSeekBar() {
-        binding!!.sbMusicChanges.progress = playerService.mediaPlayer.currentPosition
-        binding!!.tvWastedTime.text = createTimeLabel(playerService.mediaPlayer.currentPosition)
-        binding!!.tvRemainingTime.text = createTimeLabel(playerService.mediaPlayer.duration - playerService.mediaPlayer.currentPosition)
+
+    fun updateSeekBar(currentTime: Int) {
+        binding!!.sbMusicChanges.progress = currentTime
+        binding!!.tvWastedTime.text = createTimeLabel(currentTime)
+        binding!!.tvRemainingTime.text = createTimeLabel(duration!!-currentTime)
 
     }
+
+    fun updatePlayButton(){
+        if (usedService.mediaPlayer.isPlaying){
+            binding!!.bvPlay.setBackgroundResource(R.drawable.ic_baseline_pause_24)
+        } else {
+            binding!!.bvPlay.setBackgroundResource(R.drawable.ic_baseline_play_arrow_24)
+        }
+    }
+
     fun createTimeLabel(time: Int): String {
         var timeLabel = ""
         val min = time / 1000 / 60
@@ -90,29 +121,25 @@ class PlayerFragment : Fragment() {
         return timeLabel
     }
 
-//    fun playOrStopMusic() {
-//        binding!!.bvPlay.setOnClickListener {
-//            if (playerService.mediaPlayer.isPlaying) {
-//                playerService.mediaPlayer.pause()
-//                binding!!.bvPlay.setBackgroundResource(R.drawable.ic_baseline_play_arrow_24)
-//            } else {
-//                playerService.mediaPlayer.start()
-//                binding!!.bvPlay.setBackgroundResource(R.drawable.ic_baseline_pause_24)
-//            }
-//        }
-//    }
+    fun playOrStopMusic() {
+        binding!!.bvPlay.setOnClickListener {
+            usedService.playOrStopMusic()
+            updatePlayButton()
+        }
+    }
 
     fun seekBarAction() {
         binding!!.sbMusicChanges.setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser){
-                    playerService.mediaPlayer.seekTo(progress);
+                if (fromUser) {
+                    managerIntent = Intent(activity?.applicationContext, PlayerService::class.java)
+                        .putExtra(SEEKBAR_ACTION, progress)
+                    activity?.startService(managerIntent)
                 }
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
     }
@@ -124,8 +151,15 @@ class PlayerFragment : Fragment() {
 
     companion object {
         const val PLAYER_FRAGMENT_TAG = "PLAYER_FRAGMENT_TAG"
-        const val PEND_REC_CODE = 1
-        const val PEND_KEY = "pendingIntent"
-        const val RESULT = "result"
+
+        const val SEEKBAR_ACTION = "seekBarAction"
+
+        const val RECEIVED_TIME = "receivedTime"
+        const val BROADCAST_ACTION_FOR_SB = "broadcastActionForSB"
+
+        const val NOTIFICATION_CHANNEL_ID = "SOME_CHANNEL"
+        const val NOTIFICATION_ID = 0
+        const val NOTIF_CHAR_SEQUENCE = "Player notify"
+        const val PLAY_OR_STOP_ACTION_FROM_NOTIFY = "PLAY_OR_STOP_ACTION_FROM_NOTIFY"
     }
 }
