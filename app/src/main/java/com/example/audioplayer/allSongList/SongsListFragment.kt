@@ -1,4 +1,4 @@
-package com.example.audioplayer
+package com.example.audioplayer.allSongList
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -9,6 +9,9 @@ import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.example.audioplayer.FileRepository
+import com.example.audioplayer.MainActivity
+import com.example.audioplayer.baseEntities.Song
 import com.example.audioplayer.databinding.FragmentListOfSongsBinding
 
 class SongsListFragment(
@@ -40,7 +43,7 @@ class SongsListFragment(
             songsList = FileRepository.giveSongFiles(requireActivity())
         }
 
-        val songsListAdapter = SongsListAdapter{song: Song, i: Int -> pathSongToPlayer(song, i) }
+        val songsListAdapter = SongsListAdapter{ song: Song, i: Int -> pathSongToPlayer(song, i) }
         songsListAdapter.submitList(songsList)
         binding?.rvSongsList?.adapter = songsListAdapter
     }

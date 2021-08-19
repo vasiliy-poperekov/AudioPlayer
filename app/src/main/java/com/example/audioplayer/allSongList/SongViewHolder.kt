@@ -1,6 +1,7 @@
-package com.example.audioplayer
+package com.example.audioplayer.allSongList
 
 import androidx.recyclerview.widget.RecyclerView
+import com.example.audioplayer.baseEntities.Song
 import com.example.audioplayer.databinding.ItemSongBinding
 
 class SongViewHolder(

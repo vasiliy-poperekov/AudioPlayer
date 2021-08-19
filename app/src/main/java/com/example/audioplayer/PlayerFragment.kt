@@ -1,21 +1,15 @@
 package com.example.audioplayer
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.*
-import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
-import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
-import com.example.audioplayer.SongsListFragment.Companion.CLICKED_SONG_KEY
-import com.example.audioplayer.SongsListFragment.Companion.CLICKED_SONG_POSITION_KEY
+import com.example.audioplayer.allSongList.SongsListFragment.Companion.CLICKED_SONG_KEY
+import com.example.audioplayer.baseEntities.Song
 import com.example.audioplayer.databinding.FragmentPlayerBinding
 
 class PlayerFragment : Fragment() {
@@ -24,9 +18,6 @@ class PlayerFragment : Fragment() {
     var managerIntent = Intent()
     var duration: Int? = 0
     var usedService = PlayerService()
-    var position: Int = 0
-    lateinit var songList: MutableList<Song>
-    lateinit var notifBuilder: Notification
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,12 +33,10 @@ class PlayerFragment : Fragment() {
 
         this.arguments = (activity as MainActivity).bundle
         val song = (arguments?.get(CLICKED_SONG_KEY) as Song)
-        binding?.tvSongTitle?.text = song.title
-        binding?.tvSongSubtitle?.text = song.subtitle
-        position = arguments?.getInt(CLICKED_SONG_POSITION_KEY)!!
-        songList = FileRepository.songList
+        updateTitleAndSubtitle(song)
 
-        managerIntent = Intent(view.context, PlayerService::class.java).putExtra(CURRENT_SONG, song)
+        managerIntent = Intent(view.context, PlayerService::class.java)
+        managerIntent.putExtra(CURRENT_SONG, song)
         activity?.startService(managerIntent)
         playOrStopMusic()
 
@@ -58,6 +47,7 @@ class PlayerFragment : Fragment() {
                 duration = usedService.mediaPlayer.duration
                 binding!!.sbMusicChanges.max = duration!!
             }
+
             override fun onServiceDisconnected(name: ComponentName?) {}
         }
         activity?.bindService(managerIntent, serviceConnection, 0)
@@ -72,44 +62,18 @@ class PlayerFragment : Fragment() {
         }
         activity?.registerReceiver(brForSeekBar, IntentFilter(BROADCAST_ACTION_FOR_SB))
 
-        seekBarAction()
-
-        val notifyManager =
-            activity?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (notifyManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID) == null) {
-                val channel = NotificationChannel(
-                    NOTIFICATION_CHANNEL_ID,
-                    NOTIF_CHAR_SEQUENCE,
-                    NotificationManager.IMPORTANCE_DEFAULT
-                )
-                notifyManager.createNotificationChannel(channel)
+        val brForTV = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val receivedSong = intent?.getSerializableExtra(CURRENT_SONG_INFO) as Song
+                updateTitleAndSubtitle(receivedSong)
+                duration = receivedSong.duration
+                binding!!.sbMusicChanges.max = duration!!
             }
         }
+        activity?.registerReceiver(brForTV, IntentFilter(BROADCAST_ACTION_FOR_TV))
 
-//        val remoteViews = RemoteViews(activity?.packageName, R.layout.notification_player)
-//        remoteViews.setTextViewText(R.id.tv_notify_song_title, "Song Title From Fragment")
-//        remoteViews.setTextViewText(R.id.tv_notify_song_subtitle, "Song Subtitle From Fragment")
-//        remoteViews.setOnClickPendingIntent(R.id.bv_notify_play_or_stop_track,
-//            PendingIntent.getService(activity?.applicationContext,
-//                0,
-//                Intent(activity?.applicationContext, PlayerService::class.java),
-//                0))
-
-        val playIntent = Intent(view.context, PlayerService::class.java)
-        playIntent.action = PLAY_OR_STOP_ACTION_FROM_NOTIFY
-        val playPendInt = PendingIntent.getService(view.context, 0, playIntent, 0)
-
-        notifBuilder =
-            NotificationCompat.Builder(activity?.applicationContext!!, NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_baseline_music_note_24)
-                .setContentTitle(song.title)
-                .setContentText(song.subtitle)
-                .addAction(R.drawable.ic_baseline_play_arrow_24, "Play", playPendInt)
-                .build()
-        notifyManager.notify(NOTIFICATION_ID, notifBuilder)
+        seekBarAction()
     }
-
 
 
     fun updateSeekBar(currentTime: Int) {
@@ -117,7 +81,7 @@ class PlayerFragment : Fragment() {
         updateTVWithTime(currentTime)
     }
 
-    fun updateTVWithTime(currentTime: Int){
+    fun updateTVWithTime(currentTime: Int) {
         binding!!.tvWastedTime.text = createTimeLabel(currentTime)
         binding!!.tvRemainingTime.text = createTimeLabel(duration!! - currentTime)
     }
@@ -147,7 +111,7 @@ class PlayerFragment : Fragment() {
 
     fun playOrStopMusic() {
         binding!!.bvPlay.setOnClickListener {
-            usedService.playOrStopMusic()
+            usedService.playOrPause()
             updatePlayButton()
         }
     }
@@ -168,34 +132,22 @@ class PlayerFragment : Fragment() {
         })
     }
 
-    fun nextAndPreviousButtonsAction(){
+    fun nextAndPreviousButtonsAction() {
         binding?.bvPlayNextTrack?.setOnClickListener {
-            if (position<songList.size-1){
-                position++
-                managerIntent = Intent(activity?.applicationContext, PlayerService::class.java).putExtra(CURRENT_SONG, songList[position])
-                activity?.startService(managerIntent)
-                updateTitleAndSubtitle(position)
-                duration = usedService.mediaPlayer.duration
-                binding!!.sbMusicChanges.max = duration!!
-                updateTVWithTime(usedService.mediaPlayer.currentPosition)
-            }
+            managerIntent = Intent(activity?.applicationContext, PlayerService::class.java)
+                .setAction(PRESS_NEXT_BUTTON_ACTION)
+            activity?.startService(managerIntent)
         }
         binding?.bvPlayLastTrack?.setOnClickListener {
-            if (position>0){
-                position--
-                managerIntent = Intent(activity?.applicationContext, PlayerService::class.java).putExtra(CURRENT_SONG, songList[position])
-                activity?.startService(managerIntent)
-                updateTitleAndSubtitle(position)
-                duration = usedService.mediaPlayer.duration
-                binding!!.sbMusicChanges.max = duration!!
-                updateTVWithTime(usedService.mediaPlayer.currentPosition)
-            }
+            managerIntent = Intent(activity?.applicationContext, PlayerService::class.java)
+                .setAction(PRESS_PREVIOUS_BUTTON_ACTION)
+            activity?.startService(managerIntent)
         }
     }
 
-    fun updateTitleAndSubtitle(position: Int){
-        binding?.tvSongTitle?.text = songList[position].title
-        binding?.tvSongSubtitle?.text = songList[position].subtitle
+    fun updateTitleAndSubtitle(song: Song) {
+        binding?.tvSongTitle?.text = song.title
+        binding?.tvSongSubtitle?.text = song.subtitle
     }
 
     override fun onDestroyView() {
@@ -204,18 +156,22 @@ class PlayerFragment : Fragment() {
     }
 
     companion object {
-        const val PLAYER_FRAGMENT_TAG = "PLAYER_FRAGMENT_TAG"
-
         const val SEEKBAR_ACTION = "seekBarAction"
 
         const val RECEIVED_TIME = "receivedTime"
         const val BROADCAST_ACTION_FOR_SB = "broadcastActionForSB"
+        const val BROADCAST_ACTION_FOR_TV = "BROADCAST_ACTION_FOR_TV"
+        const val PRESS_NEXT_BUTTON_ACTION = "PRESS_NEXT_BUTTON_ACTION"
+        const val PRESS_PREVIOUS_BUTTON_ACTION = "PRESS_PREVIOUS_BUTTON_ACTION"
 
         const val NOTIFICATION_CHANNEL_ID = "SOME_CHANNEL"
         const val NOTIFICATION_ID = 0
         const val NOTIF_CHAR_SEQUENCE = "Player notify"
-        const val PLAY_OR_STOP_ACTION_FROM_NOTIFY = "PLAY_OR_STOP_ACTION_FROM_NOTIFY"
+        const val PLAY_OR_STOP_FROM_NOTIFY = "PLAY_OR_STOP_FROM_NOTIFY"
+        const val PLAY_NEXT_FROM_NOTIFY = "PLAY_NEXT_FROM_NOTIFY"
+        const val PLAY_PREVIOUS_FROM_NOTIFY = "PLAY_PREVIOUS_FROM_NOTIFY"
 
         const val CURRENT_SONG = "CURRENT_SONG"
+        const val CURRENT_SONG_INFO = "CURRENT_SONG_INFO"
     }
 }
