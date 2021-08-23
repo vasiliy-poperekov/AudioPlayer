@@ -4,16 +4,19 @@ import com.example.audioplayer.baseEntities.Playlist
 import com.example.audioplayer.baseEntities.Song
 import com.example.audioplayer.database.daos.SongDao
 import com.example.audioplayer.database.entities.SongEntity
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 class SongRepository(
     private val songDao: SongDao
 ) {
-    fun getSongsListOnPlaylist(playlist: Playlist): List<Song> =
-        songDao.getSongsListOnPlaylist(playlist.name).map {
+    suspend fun getSongsListOnPlaylist(playlist: Playlist): ArrayList<Song> {
+        val arraySongList = arrayListOf<Song>()
+        songDao.getSongsListOnPlaylist(playlist.name).mapTo(arraySongList)
+        {
             Song(it.uri, it.title, it.subtitle, it.duration, it.playlistName)
         }
+        return arraySongList
+    }
+
 
     fun addSongWithPlayList(song: Song){
         songDao.addSongWithNewPlayList(SongEntity(song.uri, song.title, song.subtitle, song.duration, song.playlistName!!))

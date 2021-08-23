@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">AudioPlayer</string>
+    <string name="add_songs_in_playlist">Add songs in playlist</string>
+    <string name="choose_songs_which_you_want_to_add">Choose songs which you want to add</string>
 </resources>

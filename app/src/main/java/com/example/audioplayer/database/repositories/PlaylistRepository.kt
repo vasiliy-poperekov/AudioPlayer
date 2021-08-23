@@ -1,9 +1,5 @@
 package com.example.audioplayer.database.repositories
 
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
 import com.example.audioplayer.baseEntities.Playlist
 import com.example.audioplayer.database.daos.PlaylistDao
 import com.example.audioplayer.database.entities.PlaylistEntity

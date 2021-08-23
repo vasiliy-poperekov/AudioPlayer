@@ -13,9 +13,9 @@ class SongsOnPlaylistFragmentViewModel(
     private val songRepository: SongRepository
 ): ViewModel() {
 
-    val liveDataSongs: MutableLiveData<List<Song>> = MutableLiveData()
+    val liveDataSongs: MutableLiveData<ArrayList<Song>> = MutableLiveData()
 
-    fun getSongsListOnPlaylist(playlist: Playlist) {
+    fun pathSongsListOnPlaylistToLiveData(playlist: Playlist) {
         viewModelScope.launch(Dispatchers.IO) {
             liveDataSongs.postValue(songRepository.getSongsListOnPlaylist(playlist))
         }
@@ -24,14 +24,14 @@ class SongsOnPlaylistFragmentViewModel(
     fun addSongWithPlayList(song: Song, playlist: Playlist){
         viewModelScope.launch(Dispatchers.IO) {
             songRepository.addSongWithPlayList(song)
-            getSongsListOnPlaylist(playlist)
+            pathSongsListOnPlaylistToLiveData(playlist)
         }
     }
 
     fun deleteSongFromPlaylist(song: Song, playlist: Playlist){
         viewModelScope.launch(Dispatchers.IO) {
             songRepository.deleteSongFromPlaylist(song)
-            getSongsListOnPlaylist(playlist)
+            pathSongsListOnPlaylistToLiveData(playlist)
         }
     }
 }

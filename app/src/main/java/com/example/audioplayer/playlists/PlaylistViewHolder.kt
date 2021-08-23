@@ -11,9 +11,8 @@ class PlaylistViewHolder(
 ): RecyclerView.ViewHolder(binding.root) {
     fun bind(item: Playlist){
         binding.tvPlaylistTitle.text = item.name
-        itemView.setOnLongClickListener {
+        binding.bvDeletePlaylist.setOnClickListener {
             deleteItem(item)
-            true
         }
         itemView.setOnClickListener {
             clickPlaylist(item)

@@ -36,11 +36,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/bv_to_back" />
 
-    <ImageView
-        android:id="@+id/song_picture"
+    <com.gauravk.audiovisualizer.visualizer.BlastVisualizer
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/blast"
         android:layout_width="300dp"
         android:layout_height="300dp"
         android:layout_marginTop="80dp"
+        custom:avDensity="0.8"
+        custom:avType="fill"
+        custom:avColor="@color/av_dark_blue"
+        custom:avSpeed="normal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_player_title" />
@@ -51,9 +56,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="@id/song_picture"
-        app:layout_constraintStart_toStartOf="@id/song_picture"
-        app:layout_constraintTop_toBottomOf="@id/song_picture">
+        app:layout_constraintEnd_toEndOf="@+id/blast"
+        app:layout_constraintStart_toStartOf="@+id/blast"
+        app:layout_constraintTop_toBottomOf="@+id/blast">
 
         <TextView
             android:id="@+id/tv_song_title"
@@ -130,13 +135,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cl_with_time"
-        app:layout_constraintBottom_toTopOf="@id/cl_add_or_delete">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/bv_repeating_songs"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/ic_baseline_repeat_24"
+            android:background="@drawable/exo_controls_repeat_off"
             android:backgroundTint="@color/white"
             app:layout_constraintEnd_toStartOf="@id/bv_play_last_track"
             app:layout_constraintStart_toStartOf="parent"
@@ -168,48 +173,18 @@
             android:layout_height="48dp"
             android:background="@drawable/ic_baseline_fast_forward_24"
             android:backgroundTint="@color/white"
-            app:layout_constraintEnd_toStartOf="@id/bv_info_about_track"
+            app:layout_constraintEnd_toStartOf="@+id/bv_mix_songs"
             app:layout_constraintStart_toEndOf="@id/bv_play"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/bv_info_about_track"
+            android:id="@+id/bv_mix_songs"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/ic_baseline_more_horiz_24"
+            android:background="@drawable/exo_controls_shuffle_off"
             android:backgroundTint="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/bv_play_next_track"
-            app:layout_constraintTop_toTopOf="parent"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/cl_add_or_delete"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cl_playing_manager"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/bv_favourite_song"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/ic_baseline_favorite_border_24"
-            android:backgroundTint="@color/blue"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/bv_delete_song"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/bv_delete_song"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/ic_baseline_delete_24"
-            android:backgroundTint="@color/blue"
-            app:layout_constraintStart_toEndOf="@id/bv_favourite_song"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 

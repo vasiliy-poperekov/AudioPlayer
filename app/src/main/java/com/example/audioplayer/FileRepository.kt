@@ -7,8 +7,8 @@ import com.example.audioplayer.baseEntities.Song
 
 class FileRepository {
     companion object{
-        val songList = mutableListOf<Song>()
-        fun giveSongFiles(activity: FragmentActivity): MutableList<Song>{
+        fun giveSongFiles(activity: FragmentActivity): ArrayList<Song>{
+            val songList = arrayListOf<Song>()
             val songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
             val songCursor = activity.contentResolver.query(songUri, null, null, null, null)
 
@@ -27,7 +27,6 @@ class FileRepository {
                     songList.add(Song(currentSongUri.toString(), currentTitle, currentSubtitle, currentDuration))
                 } while (songCursor.moveToNext())
             }
-
             return songList
         }
     }

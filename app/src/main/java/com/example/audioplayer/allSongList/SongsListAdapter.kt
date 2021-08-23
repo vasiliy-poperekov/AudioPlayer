@@ -6,7 +6,7 @@ import com.example.audioplayer.baseEntities.Song
 import com.example.audioplayer.databinding.ItemSongBinding
 
 class SongsListAdapter(
-    private val clickSong: (Song, Int) -> Unit
+    private val clickSong: (Song) -> Unit
 ) : androidx.recyclerview.widget.ListAdapter<Song, SongViewHolder>(SongDiffUtilItemCallBack()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
         return SongViewHolder(ItemSongBinding.inflate(LayoutInflater.from(parent.context), parent, false), clickSong)

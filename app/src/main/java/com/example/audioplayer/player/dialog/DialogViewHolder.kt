@@ -1,24 +1,20 @@
-package com.example.audioplayer.songsOnPlaylist.dialog
+package com.example.audioplayer.player.dialog
 
+import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.example.audioplayer.baseEntities.Song
 import com.example.audioplayer.databinding.ItemSongForDialogBinding
 
 class DialogViewHolder(
     val binding: ItemSongForDialogBinding,
-    val addSong: (Song) -> Unit,
-    val deleteSong: (Song) -> Unit
+    val playSong: (Song) -> Unit
 ): RecyclerView.ViewHolder(binding.root) {
     fun bind(item: Song){
         binding.tvItemSongTitle.text = item.title
         binding.tvItemSongSubtitle.text = item.subtitle
-
-        binding.cbAddSongInPlaylist.setOnClickListener {
-            if (binding.cbAddSongInPlaylist.isChecked){
-                addSong(item)
-            } else {
-                deleteSong(item)
-            }
+        binding.cbAddSongInPlaylist.visibility = View.GONE
+        itemView.setOnClickListener {
+            playSong(item)
         }
     }
 }

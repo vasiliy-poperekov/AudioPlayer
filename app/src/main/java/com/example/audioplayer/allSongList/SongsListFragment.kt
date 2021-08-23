@@ -15,11 +15,11 @@ import com.example.audioplayer.baseEntities.Song
 import com.example.audioplayer.databinding.FragmentListOfSongsBinding
 
 class SongsListFragment(
-    private val reverseFragment: () -> Unit
+    private val startPlayerFragment: (songsList: ArrayList<Song>, currentSong: Song) -> Unit
 ): Fragment() {
 
     var binding: FragmentListOfSongsBinding? = null
-    var songsList = mutableListOf<Song>()
+    var songsList: ArrayList<Song> = arrayListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,22 +43,16 @@ class SongsListFragment(
             songsList = FileRepository.giveSongFiles(requireActivity())
         }
 
-        val songsListAdapter = SongsListAdapter{ song: Song, i: Int -> pathSongToPlayer(song, i) }
+        val songsListAdapter = SongsListAdapter{ pathSongToPlayer(it) }
         songsListAdapter.submitList(songsList)
         binding?.rvSongsList?.adapter = songsListAdapter
     }
 
-    fun pathSongToPlayer(song: Song, position: Int){
-        val bundle = Bundle()
-        bundle.putSerializable(CLICKED_SONG_KEY, song)
-        bundle.putInt(CLICKED_SONG_POSITION_KEY, position)
-        (activity as MainActivity).bundle = bundle
-        reverseFragment()
+    fun pathSongToPlayer(song: Song){
+        startPlayerFragment(songsList, song)
     }
 
     companion object{
-        const val CLICKED_SONG_KEY = "CLICKED_SONG_KEY"
-        const val CLICKED_SONG_POSITION_KEY = "CLICKED_SONG_POSITION_KEY"
         const val SONGS_LIST_FRAGMENT_TAG = "SONGS_LIST_FRAGMENT_TAG"
     }
 }

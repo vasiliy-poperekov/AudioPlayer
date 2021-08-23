@@ -2,7 +2,6 @@ package com.example.audioplayer.playlists
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.ListAdapter
 import com.example.audioplayer.baseEntities.Playlist
 import com.example.audioplayer.databinding.ItemPlaylistBinding
 
