@@ -169,7 +169,7 @@ class PlayerService : Service() {
 
         sendTimeForSB()
 
-        return START_NOT_STICKY
+        return START_STICKY
     }
 
     fun playOrPause() {
@@ -193,6 +193,8 @@ class PlayerService : Service() {
                 mediaPlayer.stop()
                 mediaPlayer = MediaPlayer.create(applicationContext, song.uri.toUri())
                 mediaPlayer.start()
+                sendInfoForTV()
+                sendTimeForSB()
             }
         } else {
             mediaPlayer.setOnCompletionListener {

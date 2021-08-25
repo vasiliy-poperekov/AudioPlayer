@@ -3,9 +3,7 @@ package com.example.audioplayer.player
 import android.content.*
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
@@ -13,7 +11,6 @@ import androidx.fragment.app.Fragment
 import com.example.audioplayer.R
 import com.example.audioplayer.baseEntities.Song
 import com.example.audioplayer.databinding.FragmentPlayerBinding
-import com.example.audioplayer.player.PlayerService.Companion.CURRENT_POSITION_FROM_NOTIFY
 import com.example.audioplayer.player.dialog.DialogForPlayer
 
 class PlayerFragment(
@@ -23,9 +20,10 @@ class PlayerFragment(
 ) : Fragment() {
 
     private var binding: FragmentPlayerBinding? = null
-    var managerIntent = Intent()
+    lateinit var managerIntent: Intent
     var duration: Int? = 0
-    var usedService = PlayerService()
+    lateinit var usedService: PlayerService
+    var audioSession: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,10 +53,8 @@ class PlayerFragment(
                 updatePlayButton()
                 duration = usedService.mediaPlayer.duration
                 binding?.sbMusicChanges?.max = duration!!
-//                val audioSession = usedService.mediaPlayer.audioSessionId
-//                if (audioSession!=-1){
-//                    binding?.blast?.setAudioSessionId(audioSession)
-//                }
+                audioSession = usedService.mediaPlayer.audioSessionId
+                setUpMediaSession()
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {}
@@ -81,6 +77,7 @@ class PlayerFragment(
                 updateTitleAndSubtitle(receivedSong)
                 duration = receivedSong.duration
                 binding?.sbMusicChanges?.max = duration!!
+                setUpMediaSession()
             }
         }
         activity?.registerReceiver(brForTV, IntentFilter(BROADCAST_ACTION_FOR_TV))
@@ -88,11 +85,12 @@ class PlayerFragment(
         val brForRepeatBtn = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val repeatBtnCondition = intent?.getBooleanExtra(REPEAT_CONDITION, false)
-                if (repeatBtnCondition!!){
+                if (repeatBtnCondition!!) {
                     binding?.bvRepeatingSongs?.setBackgroundResource(R.drawable.exo_controls_repeat_one)
                 } else {
                     binding?.bvRepeatingSongs?.setBackgroundResource(R.drawable.exo_controls_repeat_off)
                 }
+                setUpMediaSession()
             }
         }
         activity?.registerReceiver(brForRepeatBtn, IntentFilter(REPEAT_ACTION))
@@ -100,11 +98,12 @@ class PlayerFragment(
         val brForShuffleBtn = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val shuffleBtnCondition = intent?.getBooleanExtra(SHUFFLE_CONDITION, false)
-                if (shuffleBtnCondition!!){
+                if (shuffleBtnCondition!!) {
                     binding?.bvMixSongs?.setBackgroundResource(R.drawable.exo_controls_shuffle_on)
                 } else {
                     binding?.bvMixSongs?.setBackgroundResource(R.drawable.exo_controls_shuffle_off)
                 }
+                setUpMediaSession()
             }
         }
         activity?.registerReceiver(brForShuffleBtn, IntentFilter(SHUFFLE_ACTION))
@@ -116,7 +115,21 @@ class PlayerFragment(
         bvToBackAction()
     }
 
-    fun bvMixSongsActions(){
+    fun setUpMediaSession() {
+        if (::usedService.isInitialized && usedService.mediaPlayer.isPlaying) {
+            audioSession = usedService.mediaPlayer.audioSessionId
+            if (audioSession != -1) {
+                binding?.blast?.isEnabled = false
+                try {
+                    binding?.blast?.setAudioSessionId(audioSession)
+                } catch (e: Exception){
+                    binding?.blast?.setAudioSessionId(usedService.mediaPlayer.audioSessionId)
+                }
+            }
+        }
+    }
+
+    fun bvMixSongsActions() {
         binding?.bvMixSongs?.setOnClickListener {
             managerIntent = Intent(activity?.applicationContext, PlayerService::class.java)
             managerIntent.action = SHUFFLE_ACTION
@@ -124,7 +137,7 @@ class PlayerFragment(
         }
     }
 
-    fun bvRepeatActions(){
+    fun bvRepeatActions() {
         binding?.bvRepeatingSongs?.setOnClickListener {
             managerIntent = Intent(activity?.applicationContext, PlayerService::class.java)
             managerIntent.action = REPEAT_ACTION
@@ -132,19 +145,21 @@ class PlayerFragment(
         }
     }
 
-    fun bvSongsList(){
+    fun bvSongsList() {
         binding?.bvSongsList?.setOnClickListener {
-            DialogForPlayer((usedService.playedSongsList as ArrayList<Song>), {pathSongFromDialog(it)}).show(parentFragmentManager, PLAYER_DIALOG_TAG)
+            DialogForPlayer(
+                (usedService.playedSongsList as ArrayList<Song>),
+                { pathSongFromDialog(it) }).show(parentFragmentManager, PLAYER_DIALOG_TAG)
         }
     }
 
-    fun bvToBackAction(){
+    fun bvToBackAction() {
         binding?.bvToBack?.setOnClickListener {
             activity?.onBackPressed()
         }
     }
 
-    fun pathSongFromDialog(song: Song){
+    fun pathSongFromDialog(song: Song) {
         managerIntent = Intent(activity?.applicationContext, PlayerService::class.java)
         managerIntent.putExtra(CURRENT_SONG, song)
         activity?.startService(managerIntent)
@@ -161,7 +176,7 @@ class PlayerFragment(
     }
 
     fun updatePlayButton() {
-        if (usedService.mediaPlayer.isPlaying) {
+        if (::usedService.isInitialized && usedService.mediaPlayer.isPlaying) {
             binding?.bvPlay?.setBackgroundResource(R.drawable.ic_baseline_pause_24)
         } else {
             binding?.bvPlay?.setBackgroundResource(R.drawable.ic_baseline_play_arrow_24)
@@ -222,6 +237,13 @@ class PlayerFragment(
     fun updateTitleAndSubtitle(song: Song) {
         binding?.tvSongTitle?.text = song.title
         binding?.tvSongSubtitle?.text = song.subtitle
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (binding?.blast != null) {
+            binding?.blast?.release()
+        }
     }
 
     companion object {

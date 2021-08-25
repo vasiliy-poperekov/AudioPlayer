@@ -49,6 +49,10 @@ class SongsOnPlaylistFragment(
         binding?.fabAddNewSongToPlaylist?.setOnClickListener {
             DialogForChoosingSongs{createSongsWithPlaylist(it)}.show(parentFragmentManager, DIALOG_TAG)
         }
+
+        binding?.bvToBack?.setOnClickListener {
+            activity?.onBackPressed()
+        }
     }
 
     fun startPlayer(currentSong: Song){

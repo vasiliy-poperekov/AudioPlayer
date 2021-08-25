@@ -16,7 +16,7 @@ import com.example.audioplayer.databinding.FragmentListOfSongsBinding
 
 class SongsListFragment(
     private val startPlayerFragment: (songsList: ArrayList<Song>, currentSong: Song) -> Unit
-): Fragment() {
+) : Fragment() {
 
     var binding: FragmentListOfSongsBinding? = null
     var songsList: ArrayList<Song> = arrayListOf()
@@ -33,26 +33,51 @@ class SongsListFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (ContextCompat.checkSelfPermission(activity?.applicationContext!!, Manifest.permission.READ_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED){
-            if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)){
-                ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+        if (ContextCompat.checkSelfPermission(
+                activity?.applicationContext!!,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                activity?.applicationContext!!,
+                Manifest.permission.RECORD_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) && ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.RECORD_AUDIO
+                )
+            ) {
+                ActivityCompat.requestPermissions(
+                    requireActivity(), arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.RECORD_AUDIO
+                    ), 1
+                )
             } else {
-                ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.RECORD_AUDIO),
+                    1
+                )
             }
         } else {
             songsList = FileRepository.giveSongFiles(requireActivity())
         }
 
-        val songsListAdapter = SongsListAdapter{ pathSongToPlayer(it) }
+        val songsListAdapter = SongsListAdapter { pathSongToPlayer(it) }
         songsListAdapter.submitList(songsList)
         binding?.rvSongsList?.adapter = songsListAdapter
     }
 
-    fun pathSongToPlayer(song: Song){
+    fun pathSongToPlayer(song: Song) {
         startPlayerFragment(songsList, song)
     }
 
-    companion object{
+    companion object {
         const val SONGS_LIST_FRAGMENT_TAG = "SONGS_LIST_FRAGMENT_TAG"
     }
 }

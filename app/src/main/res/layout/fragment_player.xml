@@ -44,7 +44,7 @@
         android:layout_marginTop="80dp"
         custom:avDensity="0.8"
         custom:avType="fill"
-        custom:avColor="@color/av_dark_blue"
+        custom:avColor="@color/white"
         custom:avSpeed="normal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

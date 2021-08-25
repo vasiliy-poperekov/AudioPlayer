@@ -6,24 +6,35 @@
     android:layout_height="match_parent"
     android:background="@color/dark_violet">
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/bv_to_back"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@drawable/ic_baseline_keyboard_arrow_left_24"
+        android:backgroundTint="@color/blue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/tv_playlist_name"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
+        android:background="@color/deep_blue"
+        android:gravity="center"
         android:textAlignment="center"
+        android:textColor="@color/white"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Hello"
-        android:textColor="@color/white"/>
+        tools:text="Hello" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_songs_on_playlist"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

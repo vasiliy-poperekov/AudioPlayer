@@ -8,7 +8,7 @@
         android:id="@+id/tab_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/dark_violet"
+        android:background="@color/deep_blue"
         app:tabTextColor="@color/white"
         app:tabIndicatorColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
