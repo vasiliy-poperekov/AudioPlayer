@@ -185,6 +185,7 @@ class PlayerService : Service() {
         mediaPlayer = MediaPlayer.create(applicationContext, song.uri.toUri())
         setNewOnCompletionListener(song, 0)
         mediaPlayer.start()
+        buildAndShowNotify()
     }
 
     fun setNewOnCompletionListener(song: Song, currentPosition: Int) {
@@ -250,17 +251,13 @@ class PlayerService : Service() {
 
     fun buildAndShowNotify() {
         CoroutineScope(Dispatchers.IO).launch {
-            while (mediaPlayer != null) {
+            while (mediaPlayer!=null) {
                 val pendIntForStartPlayer = PendingIntent.getActivity(
                     applicationContext, 0, Intent(applicationContext, MainActivity::class.java)
                         .setAction(START_PLAYER_FRAGMENT_ACTION)
                         .putExtra(PLAYED_LIST, (playedSongsList as ArrayList<Song>))
                         .putExtra(SONG_FROM_NOTIFY, currentSong)
                         .putExtra(CURRENT_POSITION_FROM_NOTIFY, mediaPlayer.currentPosition)
-                        .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-//                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-//                .addFlags (Intent.FLAG_ACTIVITY_CLEAR_TASK)
-//                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     , PendingIntent.FLAG_UPDATE_CURRENT
                 )
                 notifBuilder =
@@ -321,74 +318,6 @@ class PlayerService : Service() {
                 notifyManager.notify(PlayerFragment.NOTIFICATION_ID, notifBuilder)
             }
         }
-//        val pendIntForStartPlayer = PendingIntent.getActivity(
-//            applicationContext, 0, Intent(applicationContext, MainActivity::class.java)
-//                .setAction(START_PLAYER_FRAGMENT_ACTION)
-//                .putExtra(PLAYED_LIST, (playedSongsList as ArrayList<Song>))
-//                .putExtra(SONG_FROM_NOTIFY, currentSong)
-//                .putExtra(CURRENT_POSITION_FROM_NOTIFY, mediaPlayer.currentPosition)
-//                .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-////                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-////                .addFlags (Intent.FLAG_ACTIVITY_CLEAR_TASK)
-////                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//            , PendingIntent.FLAG_UPDATE_CURRENT
-//        )
-//        notifBuilder =
-//            NotificationCompat.Builder(
-//                applicationContext,
-//                PlayerFragment.NOTIFICATION_CHANNEL_ID
-//            ).apply {
-//                setSmallIcon(R.drawable.ic_baseline_music_note_24)
-//                setContentTitle(playedSongsList[position].title)
-//                setContentText(playedSongsList[position].subtitle)
-//                setContentIntent(pendIntForStartPlayer)
-//                addAction(
-//                    R.drawable.ic_baseline_fast_rewind_24, "Back", PendingIntent
-//                        .getService(
-//                            applicationContext,
-//                            0,
-//                            Intent(applicationContext, PlayerService::class.java)
-//                                .setAction(PLAY_PREVIOUS_FROM_NOTIFY),
-//                            0
-//                        )
-//                )
-//                if (mediaPlayer.isPlaying) {
-//                    addAction(
-//                        R.drawable.ic_baseline_pause_24, "Pause", PendingIntent
-//                            .getService(
-//                                applicationContext,
-//                                0,
-//                                Intent(applicationContext, PlayerService::class.java)
-//                                    .setAction(PLAY_OR_STOP_FROM_NOTIFY),
-//                                0
-//                            )
-//                    )
-//                } else {
-//                    addAction(
-//                        R.drawable.ic_baseline_play_arrow_24, "Play", PendingIntent
-//                            .getService(
-//                                applicationContext,
-//                                0,
-//                                Intent(applicationContext, PlayerService::class.java)
-//                                    .setAction(PLAY_OR_STOP_FROM_NOTIFY),
-//                                0
-//                            )
-//                    )
-//                }
-//                addAction(
-//                    R.drawable.ic_baseline_fast_forward_24, "Next", PendingIntent
-//                        .getService(
-//                            applicationContext,
-//                            0,
-//                            Intent(applicationContext, PlayerService::class.java)
-//                                .setAction(PLAY_NEXT_FROM_NOTIFY),
-//                            0
-//                        )
-//                )
-//                setStyle(androidx.media.app.NotificationCompat.MediaStyle())
-//                setSilent(true)
-//            }.build()
-//        notifyManager.notify(PlayerFragment.NOTIFICATION_ID, notifBuilder)
     }
 
     companion object {
